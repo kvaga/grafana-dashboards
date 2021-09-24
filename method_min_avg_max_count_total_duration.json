@@ -1,0 +1,148 @@
+{
+  "id": 10,
+  "gridPos": {
+    "h": 8,
+    "w": 24,
+    "x": 0,
+    "y": 8
+  },
+  "type": "table",
+  "title": "💀Времена отклика успешно исполненных сервисов",
+  "transformations": [
+    {
+      "id": "merge",
+      "options": {
+        "reducers": []
+      }
+    },
+    {
+      "id": "organize",
+      "options": {
+        "excludeByName": {
+          "Time": true
+        },
+        "indexByName": {},
+        "renameByName": {
+          "Time": "hidden",
+          "method": ""
+        }
+      }
+    },
+    {
+      "id": "filterFieldsByName",
+      "options": {
+        "include": {
+          "names": [
+            "method",
+            "Min",
+            "Avg",
+            "Max",
+            "Perc90",
+            "Count",
+            "Total Duration"
+          ]
+        }
+      }
+    }
+  ],
+  "datasource": "InfluxDB-Methods",
+  "pluginVersion": "8.1.5",
+  "links": [],
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "align": null,
+        "displayMode": "auto",
+        "filterable": true
+      },
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      },
+      "mappings": [],
+      "color": {
+        "mode": "thresholds"
+      },
+      "decimals": 3,
+      "unit": "ms"
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Count"
+        },
+        "properties": [
+          {
+            "id": "unit",
+            "value": "string"
+          }
+        ]
+      }
+    ]
+  },
+  "options": {
+    "showHeader": true,
+    "sortBy": [
+      {
+        "displayName": "Total Duration",
+        "desc": true
+      }
+    ]
+  },
+  "targets": [
+    {
+      "alias": "$tag_ScriptName",
+      "groupBy": [
+        {
+          "params": [
+            "ScriptName"
+          ],
+          "type": "tag"
+        }
+      ],
+      "hide": false,
+      "measurement": "/^$Measurement$/",
+      "orderByTime": "ASC",
+      "policy": "autogen",
+      "query": "SELECT min(v) as Min, mean(v) as Avg, max(v) as Max, percentile(v, 90) as Perc90, count(v) as Count , mean(v)*count(v) as \"Total Duration\" FROM \"defaultPolicy\".response_time WHERE  \nv>0 AND $timeFilter GROUP BY \"method\" ",
+      "rawQuery": true,
+      "refId": "A",
+      "resultFormat": "table",
+      "select": [
+        [
+          {
+            "params": [
+              "Response_Time"
+            ],
+            "type": "field"
+          }
+        ]
+      ],
+      "tags": [
+        {
+          "key": "Status",
+          "operator": "=",
+          "value": "SUCCESS"
+        },
+        {
+          "condition": "AND",
+          "key": "ScriptName",
+          "operator": "=~",
+          "value": "/^$ScriptName$/"
+        }
+      ]
+    }
+  ],
+  "timeFrom": null,
+  "timeShift": null
+}
